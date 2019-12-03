@@ -3,28 +3,20 @@ import json
 from typing import List
 
 
-class StockEntry(object):
-    def __init__(self, *, symbol: str):
-        self.symbol = symbol
-        self.date: List[str] = []
-        self.close_price: List[float] = []
-        self.__counter = 0
+def _calculate_change(current: float, previous: float) -> float:
+    try:
+        return round((current - previous) / previous * 100, 2)
+    except ZeroDivisionError:
+        return 0.0
 
-    def length(self):
-        return len(self.close_price)
 
-    def generate_changes(self):
-        try:
-            for i in range(len(self.close_price)):
-                previous = self.close_price[i]
-                current = self.close_price[i + 1]
-                try:
-                    result = round((current - previous) / previous * 100, 2)
-                except ZeroDivisionError:
-                    result = 0.0
-                yield result
-        except IndexError:
-            return
+def _map_entry(symbol: str, data: List[dict]):
+    previous = data[0]['close']
+    for single in data[1:]:
+        current = single['close']
+        change = _calculate_change(current, previous)
+        previous = current
+        print(f'{symbol}\t{change}\t1')
 
 
 def mapper():
@@ -38,12 +30,7 @@ def mapper():
         for entry in entry_content:
             entry_name = entry['symbol']
             entry_data = entry['historical']
-            stock_entry = StockEntry(symbol=entry_name)
-            for single in entry_data:
-                stock_entry.close_price.append(single['close'])
-                stock_entry.date.append(single['date'])
-            for change in stock_entry.generate_changes():
-                print(f'{stock_entry.symbol}\t{change}\t1')
+            _map_entry(entry_name, entry_data)
 
 
 if __name__ == '__main__':

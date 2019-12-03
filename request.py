@@ -1,5 +1,6 @@
 import json
 import os
+import pathlib
 import time
 from typing import List, Optional
 
@@ -32,6 +33,7 @@ def _get_stock_list() -> List[str]:
 
 
 def run():
+    pathlib.Path('data').mkdir(parents=True, exist_ok=True)
     stock_list = _get_stock_list()
     for i in range(0, len(stock_list), 3):
         symbols = stock_list[i:i+3]

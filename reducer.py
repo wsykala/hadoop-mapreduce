@@ -9,7 +9,7 @@ def _parse_reduce_output(reduce_dict: Dict[str, Dict[str, int]]):
             print(f'{symbol}\t{change}\t{count}')
 
 
-def reduce():
+def reducer():
     """
     Runs the reduce job.
     Input lines are passed as below:
@@ -31,4 +31,4 @@ def reduce():
 
 
 if __name__ == '__main__':
-    reduce()
+    reducer()
