@@ -43,7 +43,7 @@ def run():
         response = _fetch(url)
         with open(os.path.join('data', file_name), 'w') as file:
             json.dump(response.json(), file, indent=4)
-        time.sleep(1)
+        time.sleep(0.25)
 
 
 if __name__ == '__main__':
