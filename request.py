@@ -33,17 +33,19 @@ def _get_stock_list() -> List[str]:
 
 
 def run():
-    pathlib.Path('data').mkdir(parents=True, exist_ok=True)
+    data_dir = 'data'
+    pathlib.Path(data_dir).mkdir(parents=True, exist_ok=True)
     stock_list = _get_stock_list()
     for i in range(0, len(stock_list), 3):
         symbols = stock_list[i:i+3]
         url = _API_URL_TEMPLATE.format(','.join(symbols))
         file_name = '_'.join(symbols) + '.json'
-        if os.path.exists(file_name):
+        file_path = os.path.join(data_dir, file_name)
+        if os.path.exists(file_path):
             continue
         print(f'Fetching {url}')
         response = _fetch(url)
-        with open(os.path.join('data', file_name), 'w') as file:
+        with open(file_path, 'w') as file:
             json.dump(response.json(), file, indent=4)
         time.sleep(0.25)
 

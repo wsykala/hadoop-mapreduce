@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from collections import defaultdict
 import fileinput
 from typing import Dict
