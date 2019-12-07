@@ -9,7 +9,7 @@ docker build -t hdfs-mapreduce .
 ```
 
 The process will take some time when building for the first time.
-After successful build run the container in interactive mode.
+After successful build, run the container in interactive mode.
 
 **Important**: Exiting from the terminal/console will stop the container (all of the data and progress inside of it will be lost)
 
@@ -17,39 +17,44 @@ After successful build run the container in interactive mode.
 docker run -it hdfs-mapreduce:latest /etc/bootstrap.sh -bash
 ``` 
 
+**Note**: While inside the container, the data needs to be downloaded first. 
+By default it will be the first that is execute while running the **run.py** script.
 
-While inside the container the data needs to be downloaded and then added to HDFS.
-
-**TODO**: This is not yet implemented in a single script. Below is a description on how to do it right now:
+To run the job:
 
 ```bash
-# Download some data (if you don't want to have all of it, just ctrl+C after downloading a few files)
-python3 request.py
-
-# Run the parser and redirect stdin to file (choose an appropiate name)
-python3 parser.py > test.txt
-
-# Add the file to HDFS (the directories and files could be whatever you want, but remember them)
-/usr/local/hadoop/bin/hdfs dfs -mkdir -p test_dir/
-/usr/local/hadoop/bin/hdfs dfs -put /mapreduce/test.txt test_dir/
-
-# If you want to see if the file was really added to HDFS run the comand below
-/usr/local/hadoop/bin/hdfs dfs -ls test_dir
-
-# To run the map reduce job (input is the file inside HDFS)
-python3 run.py --input test_dir/test.txt --output test_dir/out/
-
-# This script will create a directory inside specified --output dir (to prevent an error with 'file already exists')
-# The directory name is the current timestamp
-# To print the results of the job, first find the directory
-/usr/local/hadoop/bin/hdfs dfs -ls test_dir/out
-
-# Found 1 items
-# drwxr-xr-x   - root supergroup          0 2019-12-04 16:44 test_dir/out/1575495825
-
-# Then print the results
-/usr/local/hadoop/bin/hdfs dfs -cat test_dir/out/1575495825/*
+# Optional flag --download true/false can be passed (by default it is true)
+python3 run.py --input /mapreduce/parse.txt --output job_dir/
 ```
+
+This command will by default download the data and save it to **/mapreduce/data** directory. After that the data will be
+parsed and saved in a single file **/mapreduce/parse.txt**.
+
+After preparing the data, the script will automatically create the **output** directory inside HDFS and put the
+**parse.txt** file inside a timestamped directory inside. Then the mapreduce job will run and the data will be saved
+inside the same directory as the inptu file.
+
+To see the results of the job:
+
+```bash
+# List the job_dir directory
+/usr/local/hadoop/bin/hdfs dfs -ls job_dir
+
+Found 1 items
+drwxr-xr-x   - root supergroup          0 2019-12-07 09:57 job_dir/1575730652
+
+# List the last job directory
+/usr/local/hadoop/bin/hdfs dfs -ls job_dir/1575730652
+
+Found 2 items
+drwxr-xr-x   - root supergroup          0 2019-12-07 09:58 job_dir/1575730652/out
+-rw-r--r--   1 root supergroup     907326 2019-12-07 09:57 job_dir/1575730652/parse.txt
+
+# Print the results
+/usr/local/hadoop/bin/hdfs dfs -cat job_dir/1575730652/out/*
+```
+
+**Note**: The job also runs periodically every 15th minute (for example at 9:00, 9:15, 9:30, etc.)
  
 ## How to run locally
 
@@ -77,14 +82,3 @@ python parser.py | python mapper.py | python reducer.py
 ```
 
 **Warning:** This command will take some time to finish and print **A LOT** of stuff to the stdout.
-
-## What needs to be done
-
-* The parser step SHOULD be done before running the job. Do one of the following:
-    * Download the files and then run the parser (create a new script)
-    * Run the parser at the startup (5 GB of data is added to the image)
-    * Change the **request.py** file so it saves already parsed data and then add it into the image
-* Add crontab entry to run the jobs periodically
-* Create a script that puts the parsed file into HDFS
-* Do something about the initial data download (Data can be added into the build, but this will make the image bigger).
-Unfortunately **-v** seems to not work properly.

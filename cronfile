@@ -1,0 +1,1 @@
+*/15 * * * * /usr/bin/python3 /mapreduce/run.py --input /mapreduce/parse.txt --output job_dir/ > /mapreduce/cron_log.log 2>&1

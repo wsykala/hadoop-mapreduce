@@ -5,7 +5,9 @@ import time
 from typing import List, Optional
 
 import requests
+from tqdm import tqdm
 
+path = os.path.dirname(os.path.abspath(__file__))
 
 _STOCK_LIST_URL = 'https://financialmodelingprep.com/api/v3/company/stock/list'
 _API_URL_TEMPLATE = 'https://financialmodelingprep.com/api/v3/' \
@@ -33,10 +35,11 @@ def _get_stock_list() -> List[str]:
 
 
 def run():
-    data_dir = 'data'
+    data_dir = os.path.join(path, 'data')
     pathlib.Path(data_dir).mkdir(parents=True, exist_ok=True)
     stock_list = _get_stock_list()
-    for i in range(0, len(stock_list), 3):
+    print('Downloading data')
+    for i in tqdm(range(0, len(stock_list), 3)):
         symbols = stock_list[i:i+3]
         url = _API_URL_TEMPLATE.format(','.join(symbols))
         file_name = '_'.join(symbols) + '.json'
