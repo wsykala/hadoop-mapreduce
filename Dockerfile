@@ -1,9 +1,9 @@
 FROM sequenceiq/hadoop-docker
 
-RUN yum -y update
-RUN yum -y install centos-release-scl
-RUN yum -y install rh-python36
-RUN yum -y install vixie-cron
+RUN yum -y update ; yum clean all
+RUN yum -y install centos-release-scl ; yum clean all
+RUN yum -y install rh-python36 ; yum clean all
+RUN yum -y install vixie-cron ; yum clean all
 
 # Hack for python3 (thanks CentOS!)
 RUN ln -s /opt/rh/rh-python36/root/usr/bin/python /usr/bin/python3

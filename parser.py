@@ -13,7 +13,7 @@ def parse():
     Loads and prepares the *.json data for mapper
     """
     print('Parsing data')
-    file_list = sorted(glob.glob('data/*.json'))
+    file_list = sorted(glob.glob(f'{path}/data/*.json'))
     with open(os.path.join(path, 'parse.txt'), 'w') as parsed_file:
         for file in tqdm(file_list):
             with open(file, 'r') as fp:
